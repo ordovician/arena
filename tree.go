@@ -17,8 +17,11 @@ func (tree *Tree[K, V]) NewNode(key K, value V) *TreeNode[K, V] {
 	}
 	n := tree.free
 	tree.free = tree.free.left
+
 	n.Key = key
 	n.Value = value
+	n.left = nil
+	n.right = nil
 
 	return n
 }
