@@ -9,7 +9,11 @@ type Arena[T any] struct {
 // when no longer used
 func (arena *Arena[T]) Alloc() *T {
 	if arena.blocks.IsEmpty() {
-		var blocks [4]T
+		// allocate in chunks of 8 to avoid too frequent allocations
+		var blocks [8]T
+		// No, you cannot iterate over blocks, because that would make a copy of the block
+		// and you would get the address of the copy rather than address of blocks[i]
+		// hence index i must be used when iterating
 		for i, _ := range blocks {
 			arena.blocks.Push(&blocks[i])
 		}
@@ -24,6 +28,12 @@ func (arena *Arena[T]) Alloc() *T {
 func (arena *Arena[T]) Free(block *T) {
 	if block == nil {
 		panic("Cannot free nil pointer")
+	}
+
+	// A very basic test to see if we are doing a double-free
+	// does not protect against freeing object further down the stack
+	if top, ok := arena.blocks.Top(); !ok || top == block {
+		panic("Releasing previosly freed pointer")
 	}
 	arena.blocks.Push(block)
 }

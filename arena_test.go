@@ -40,6 +40,8 @@ func TestArenaFree(t *testing.T) {
 	q := arena.Alloc()
 	r := arena.Alloc()
 
+	// Use old fashion checks because asser.Equal did not work properly. So don't
+	// put you faith in assert.Equal it maybe overpromising.
 	if p != q {
 		t.Errorf("p: %p should not be equal to q: %p since q is a reuse of p", p, q)
 	}
