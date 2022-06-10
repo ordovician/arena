@@ -55,6 +55,10 @@ func (parent *TreeNode[K, V]) Iterator() <-chan *TreeNode[K, V] {
 
 	go func() {
 		parent.traverse(channel)
+
+		// IMPORTANT: to tell range that we are done iterating
+		// otherwise for-loop using range will never finnish. It hangs.
+		close(channel)
 	}()
 
 	return channel
