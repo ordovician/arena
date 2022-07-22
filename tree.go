@@ -9,9 +9,6 @@ type Tree[K constraints.Ordered, V any] struct {
 
 func NewTree[K constraints.Ordered, V any]() *Tree[K, V] {
 	var tree Tree[K, V]
-	// var allocator Arena[TreeNode[K, V]]
-
-	// tree.allocator = &allocator
 	return &tree
 }
 
