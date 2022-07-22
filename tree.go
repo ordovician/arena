@@ -3,21 +3,20 @@ package arenatree
 import "golang.org/x/exp/constraints"
 
 type Tree[K constraints.Ordered, V any] struct {
-	Root *TreeNode[K, V]
-	free *TreeNode[K, V] // list of released nodes ready to be allocated
+	Root      *TreeNode[K, V]
+	allocator Arena[TreeNode[K, V]]
+}
+
+func NewTree[K constraints.Ordered, V any]() *Tree[K, V] {
+	var tree Tree[K, V]
+	// var allocator Arena[TreeNode[K, V]]
+
+	// tree.allocator = &allocator
+	return &tree
 }
 
 func (tree *Tree[K, V]) NewNode(key K, value V) *TreeNode[K, V] {
-	if tree.free == nil {
-		nodes := make([]TreeNode[K, V], 4)
-		for i := 0; i < len(nodes)-1; i++ {
-			nodes[i].left = &nodes[i+1]
-		}
-		tree.free = &nodes[0]
-	}
-	n := tree.free
-	tree.free = tree.free.left
-
+	n := tree.allocator.Alloc()
 	n.Key = key
 	n.Value = value
 	n.left = nil
@@ -46,9 +45,9 @@ func (tree *Tree[K, V]) release(n *TreeNode[K, V]) {
 	if n.right != nil {
 		tree.release(n.right)
 	}
-	n.left = tree.free
+	n.left = nil
 	n.right = nil
-	tree.free = n
+	tree.allocator.Free(n)
 }
 
 func (tree *Tree[K, V]) Insert(key K, value V) {

@@ -2,9 +2,6 @@ package arenatree
 
 import (
 	"testing"
-
-	// to get convenient assert function
-	"github.com/stretchr/testify/assert"
 )
 
 func createTestTree() Tree[int, string] {
@@ -86,8 +83,14 @@ func TestDeleteTreeNode(t *testing.T) {
 	tree := createTestTree()
 
 	eight, _ := tree.Root.findNode(8)
-	assert.NotEqual(t, *eight, tree.free, "Node with key %v has been allocated and should not be in free list", (*eight).Key)
+
+	if node, found := tree.allocator.blocks.Top(); found && node == *eight {
+		t.Errorf("Node with key %v has been allocated and should not be in free list", (*eight).Key)
+	}
+
 	tree.Delete(8)
-	assert.Equal(t, *eight, tree.free, "Just released node %v should be at top of free list", (*eight).Key)
+	if node, found := tree.allocator.blocks.Top(); found && node != *eight {
+		t.Errorf("Just released node %v should be at top of free list", (*eight).Key)
+	}
 
 }
